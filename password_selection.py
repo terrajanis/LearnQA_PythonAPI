@@ -18,4 +18,3 @@ for password in passwords:
         print("Поздравляем, правильный пароль - " + password)
         break
 
-    file.close()
