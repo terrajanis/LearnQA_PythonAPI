@@ -1,4 +1,4 @@
-class CheckPhraseLength:
+class TestCheckPhraseLength:
     def test_check_phrase_length(self):
         phrase = input("Set a phrase: ")
         phrase_length = len(phrase)
