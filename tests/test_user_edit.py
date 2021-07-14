@@ -49,3 +49,4 @@ class TestUserEdit(BaseCase):
             cookies={"auth_sid": auth_sid})
 
         Assertions.assert_json_value_by_name(response4, "firstName", new_name, "Wrong name of the user after edit")
+
