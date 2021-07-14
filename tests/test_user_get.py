@@ -1,10 +1,12 @@
+import allure
 
-from lib.base_case import BaseCase
 from lib.assertions import Assertions
+from lib.base_case import BaseCase
 from lib.my_requests import MyRequests
-from models.user import User
+from steps.user_steps import UserSteps
 
 
+@allure.epic("Get user data cases")
 class TestUserGet(BaseCase):
 
     data = {
@@ -12,6 +14,9 @@ class TestUserGet(BaseCase):
         'password': '1234'
     }
 
+    @allure.title("Get user data without authorization")
+    @allure.description("This test check that only username field is returned without authorization")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_get_user_details_not_auth(self):
         response = MyRequests.get("/user/2")
 
@@ -20,6 +25,9 @@ class TestUserGet(BaseCase):
         Assertions.assert_json_has_not_key(response, "firstName")
         Assertions.assert_json_has_not_key(response, "lastName")
 
+    @allure.title("Get user data")
+    @allure.description("This test check receiving the user data")
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_get_user_details_auth_as_same_user(self):
 
         response1 = MyRequests.post("/user/login", data=self.data)
@@ -35,16 +43,12 @@ class TestUserGet(BaseCase):
         expected_fields = ["username", "email", "firstName", "lastName"]
         Assertions.assert_json_has_keys(response2, expected_fields)
 
+    @allure.title("Get user data by another user")
+    @allure.description("This test check that only username field is returned when another user asj for data")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_get_user_details_auth_as_another_user(self):
         #REGISTER
-        self.user = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data = self.prepare_registration_data(self.user)
-        response1 = MyRequests.post("/user/", data=register_data)
-
-        Assertions.assert_code_status(response1, 200)
-        Assertions.assert_json_has_key(response1, "id")
-
-        user_id = self.get_json_value(response1, "id")
+        email, password, user_id, first_name = UserSteps().registrate_user()
 
         #LOGIN
         response2 = MyRequests.post("/user/login", data=self.data)

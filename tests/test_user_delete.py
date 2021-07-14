@@ -1,13 +1,17 @@
+import allure
 
-from lib.base_case import BaseCase
 from lib.assertions import Assertions
+from lib.base_case import BaseCase
 from lib.my_requests import MyRequests
-from models.user import User
+from steps.user_steps import UserSteps
 
 
+@allure.epic("Delete user cases")
 class TestUserDelete(BaseCase):
 
-
+    @allure.title("Delete the user with id 2")
+    @allure.description("This test check that the user with id 2 cannot be deleted")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_delete_user_with_id_2(self):
         data = {
             'email': 'vinkotov@example.com',
@@ -27,18 +31,12 @@ class TestUserDelete(BaseCase):
         assert response2.content.decode(
             "utf-8") == "Please, do not delete test users with ID 1, 2, 3, 4 or 5.", "Can delete user with id 2"
 
+    @allure.title("Delete a user")
+    @allure.description("This test check that a created user is successfully deleted")
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_delete_created_user(self):
         #REGISTER
-        self.user = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data = self.prepare_registration_data(self.user)
-        response1 = MyRequests.post("/user/", data=register_data)
-
-        Assertions.assert_code_status(response1, 200)
-        Assertions.assert_json_has_key(response1, "id")
-
-        email = register_data['email']
-        password = register_data['password']
-        user_id = self.get_json_value(response1, "id")
+        email, password, user_id, first_name = UserSteps().registrate_user()
 
         #LOGIN
 
@@ -69,17 +67,12 @@ class TestUserDelete(BaseCase):
 
         Assertions.assert_code_status(response4, 404)
 
+    @allure.title("Delete a user by another user")
+    @allure.description("This test check that a created user cannot be deleted by another user")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_delete_user_by_another_user(self):
         #REGISTER
-        self.user = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data = self.prepare_registration_data(self.user)
-        response1 = MyRequests.post("/user/", data=register_data)
-
-        Assertions.assert_code_status(response1, 200)
-        Assertions.assert_json_has_key(response1, "id")
-
-        email = register_data['email']
-        password = register_data['password']
+        email, password, user_id, first_name = UserSteps().registrate_user()
 
         #LOGIN
 
@@ -94,17 +87,7 @@ class TestUserDelete(BaseCase):
         token = self.get_header(response2, "x-csrf-token")
 
         #REGISTER ANOTHER USER
-
-        self.user2 = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data2 = self.prepare_registration_data(self.user2)
-        response3 = MyRequests.post("/user/", data=register_data2)
-
-        Assertions.assert_code_status(response3, 200)
-        Assertions.assert_json_has_key(response3, "id")
-
-        another_email = register_data2['email']
-        another_password = register_data2['password']
-        user_id = self.get_json_value(response3, "id")
+        another_email, another_password, user_id, first_name = UserSteps().registrate_user()
 
         #LOGIN SECOND USER
 

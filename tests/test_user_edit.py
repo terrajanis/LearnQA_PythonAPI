@@ -1,24 +1,18 @@
+import allure
 
-from lib.base_case import BaseCase
 from lib.assertions import Assertions
+from lib.base_case import BaseCase
 from lib.my_requests import MyRequests
-from models.user import User
+from steps.user_steps import UserSteps
 
 
+@allure.epic("Edit user data cases")
 class TestUserEdit(BaseCase):
+    @allure.title("Edit a created user")
+    @allure.description("This test check that a created user is successfully edit")
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_edit_just_created_user(self):
-        #REGISTER
-        self.user = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data = self.prepare_registration_data(self.user)
-        response1 = MyRequests.post("/user/", data=register_data)
-
-        Assertions.assert_code_status(response1, 200)
-        Assertions.assert_json_has_key(response1, "id")
-
-        email = register_data['email']
-        first_name = register_data['firstName']
-        password = register_data['password']
-        user_id = self.get_json_value(response1, "id")
+        email, password, user_id, first_name = UserSteps().registrate_user()
 
         #LOGIN
 
@@ -50,16 +44,12 @@ class TestUserEdit(BaseCase):
 
         Assertions.assert_json_value_by_name(response4, "firstName", new_name, "Wrong name of the user after edit")
 
+    @allure.title("Edit a created user by an unauthorized_user")
+    @allure.description("This test check that a created user cannot be edited by an unauthorized user")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_edit_unauthorized_user(self):
         #REGISTER
-        self.user = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data = self.prepare_registration_data(self.user)
-        response1 = MyRequests.post("/user/", data=register_data)
-
-        Assertions.assert_code_status(response1, 200)
-        Assertions.assert_json_has_key(response1, "id")
-
-        user_id = self.get_json_value(response1, "id")
+        email, password, user_id, first_name = UserSteps().registrate_user()
 
         #EDIT
         new_name = "Changed Name"
@@ -71,17 +61,12 @@ class TestUserEdit(BaseCase):
         assert response2.content.decode(
             "utf-8") == f"Auth token not supplied", "Can change the user data without authorization"
 
+    @allure.title("Edit a created user by another user")
+    @allure.description("This test check that a created user cannot be edited by another user")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_edit_another_user(self):
         #REGISTER
-        self.user = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data = self.prepare_registration_data(self.user)
-        response1 = MyRequests.post("/user/", data=register_data)
-
-        Assertions.assert_code_status(response1, 200)
-        Assertions.assert_json_has_key(response1, "id")
-
-        email = register_data['email']
-        password = register_data['password']
+        email, password, user_id, first_name = UserSteps().registrate_user()
 
         #LOGIN FIRST USER
 
@@ -95,17 +80,7 @@ class TestUserEdit(BaseCase):
         token = self.get_header(response2, "x-csrf-token")
 
         #REGISTER ANOTHER USER
-        self.user2 = User(self.prepare_email(), 'learnqa2', 'learnqa2', 'learnqa2', 'learnqa2')
-        register_data2 = self.prepare_registration_data(self.user2)
-        response2 = MyRequests.post("/user/", data=register_data2)
-
-        Assertions.assert_code_status(response2, 200)
-        Assertions.assert_json_has_key(response2, "id")
-
-        original_first_name = register_data2['firstName']
-        another_email = register_data2['email']
-        another_password = register_data2['password']
-        another_user_id = self.get_json_value(response2, "id")
+        another_email, another_password, another_user_id, original_first_name = UserSteps().registrate_user()
 
         #EDIT SECOND USER
         new_name = "Changed Name"
@@ -137,18 +112,12 @@ class TestUserEdit(BaseCase):
 
         Assertions.assert_json_value_by_name(response5, "firstName", original_first_name, "First name is changed after edit")
 
+    @allure.title("Edit a created user with an incorrect email")
+    @allure.description("This test check that a created user cannot be edited with an incorrect email")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_edit_user_with_incorrect_email(self):
         #REGISTER
-        self.user = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data = self.prepare_registration_data(self.user)
-        response1 = MyRequests.post("/user/", data=register_data)
-
-        Assertions.assert_code_status(response1, 200)
-        Assertions.assert_json_has_key(response1, "id")
-
-        email = register_data['email']
-        password = register_data['password']
-        user_id = self.get_json_value(response1, "id")
+        email, password, user_id, first_name = UserSteps().registrate_user()
 
         #LOGIN
 
@@ -173,18 +142,12 @@ class TestUserEdit(BaseCase):
         assert response3.content.decode(
             "utf-8") == "Invalid email format", f"Email '{new_email}' is accepted"
 
+    @allure.title("Edit a created user with a short first name")
+    @allure.description("This test check that a created user cannot be edited with a short first name")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_edit_user_with_short_first_name(self):
         #REGISTER
-        self.user = User(self.prepare_email(), 'learnqa', 'learnqa', 'learnqa', 'learnqa')
-        register_data = self.prepare_registration_data(self.user)
-        response1 = MyRequests.post("/user/", data=register_data)
-
-        Assertions.assert_code_status(response1, 200)
-        Assertions.assert_json_has_key(response1, "id")
-
-        email = register_data['email']
-        password = register_data['password']
-        user_id = self.get_json_value(response1, "id")
+        email, password, user_id, first_name = UserSteps().registrate_user()
 
         #LOGIN
 

@@ -22,7 +22,12 @@ class TestUserAuth(BaseCase):
         self.token = self.get_header(response1, "x-csrf-token")
         self.user_id_from_auth_method = self.get_json_value(response1, "user_id")
 
+    @allure.title("Authorize the user")
     @allure.description("This test successfully authorize user by email and password")
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.testcase("https://github.com/terrajanis/LearnQA_PythonAPI")
+    @allure.feature('feature_2')
+    @allure.story('story_2')
     def test_auth_user(self):
 
         response2 = MyRequests.get(
@@ -39,7 +44,10 @@ class TestUserAuth(BaseCase):
             )
 
 
+    @allure.title("Authorize the user without cookie or token")
     @allure.description("This test checks authorization status w/o sending auth cookie or token")
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.issue('JR-140')
     @pytest.mark.parametrize('condition',exclude_params)
     def test_negative_auth_check(self, condition):
 
